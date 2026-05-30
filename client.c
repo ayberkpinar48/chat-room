@@ -12,6 +12,7 @@ int main() {
     int sock;
     struct sockaddr_in server_address = {0};
     socklen_t addrlen  = sizeof(server_address);
+    char buffer[BUFFER_SIZE];
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("SOCKET ERROR");
@@ -31,9 +32,17 @@ int main() {
         perror("CONNECTION ERROR");
         exit(EXIT_FAILURE);
     }
-
     printf("Connection is succesfull\n");
 
+
+    printf("Message: ");
+    fgets(buffer, BUFFER_SIZE, stdin);
+
+    if(send(sock, buffer, BUFFER_SIZE, 0) < 0){
+        perror("ERROR SEND");
+        exit(EXIT_FAILURE);
+    }
+    printf("Message is sent to server\n");
 
     close(sock);
     return 0;

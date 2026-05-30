@@ -12,6 +12,7 @@ int main() {
     int server_fd, new_socket; //file descriptor
     struct sockaddr_in address = {0};
     socklen_t addrlen = sizeof(address);
+    char buffer[BUFFER_SIZE];
 
     if((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
         perror("socket cannot be created");
@@ -38,8 +39,19 @@ int main() {
         perror("ACCEPT ERROR");
         exit(EXIT_FAILURE);
     }
-
     printf("Connection is succesfull\n");
+
+    if(recv(new_socket, buffer, BUFFER_SIZE, 0) < 0){
+        perror("ERROR RECV ON SERVER SIDE");
+        exit(EXIT_FAILURE);
+    }
+    printf("Received message from client: %s\n", buffer);
+
+    if(send(new_socket, buffer, BUFFER_SIZE, 0) < 0){
+        perror("ERROR SEND SERVER");
+        exit(EXIT_FAILURE);
+    }
+    printf("Response %s is sent to client\n", buffer);
 
     close(new_socket);
     close(server_fd);
