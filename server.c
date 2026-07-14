@@ -28,7 +28,7 @@ void *client_handler(void *socket_desc) {
             break;
         }
 
-        printf("Message %s comes from %d", sock, buffer);
+        printf("Socket %d sent: %s", sock, buffer);
         send(sock, buffer, strlen(buffer), 0);
     }
 
