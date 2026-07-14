@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -41,17 +42,30 @@ int main() {
     }
     printf("Connection is succesfull\n");
 
-    if(recv(new_socket, buffer, BUFFER_SIZE, 0) < 0){
+    while (1) {
+        memset(buffer, 0, BUFFER_SIZE);
+        
+        int valread = recv(new_socket, buffer, BUFFER_SIZE, 0);
+
+        if(valread < 0) { 
         perror("ERROR RECV ON SERVER SIDE");
         exit(EXIT_FAILURE);
-    }
-    printf("Received message from client: %s\n", buffer);
+        }
 
-    if(send(new_socket, buffer, BUFFER_SIZE, 0) < 0){
-        perror("ERROR SEND SERVER");
-        exit(EXIT_FAILURE);
+        if(valread == 0) {
+            printf("Client disconnected.\n");
+            break;
+        }
+
+        buffer[valread] = '\0';
+        
+        printf("Received message from client: %s\n", buffer);
+        
+        if(send(new_socket, buffer, BUFFER_SIZE, 0) < 0) {
+            perror("ERROR SEND SERVER");
+            exit(EXIT_FAILURE);
+        }
     }
-    printf("Response %s is sent to client\n", buffer);
 
     close(new_socket);
     close(server_fd);

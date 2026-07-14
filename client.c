@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -13,6 +14,7 @@ int main() {
     struct sockaddr_in server_address = {0};
     socklen_t addrlen  = sizeof(server_address);
     char buffer[BUFFER_SIZE];
+    char message[BUFFER_SIZE] = {0};
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("SOCKET ERROR");
@@ -34,15 +36,26 @@ int main() {
     }
     printf("Connection is succesfull\n");
 
+    while (1) {
+        memset(buffer, 0, BUFFER_SIZE);
+        
+        printf("Message: ");
+        if(fgets(buffer, BUFFER_SIZE, stdin) == NULL) break;
 
-    printf("Message: ");
-    fgets(buffer, BUFFER_SIZE, stdin);
+        if(send(sock, buffer, BUFFER_SIZE, 0) < 0) {
+            perror("ERROR SEND");
+            exit(EXIT_FAILURE);
+        }
+        printf("Message is sent to the server\n");
 
-    if(send(sock, buffer, BUFFER_SIZE, 0) < 0){
-        perror("ERROR SEND");
-        exit(EXIT_FAILURE);
+        int valread = recv(sock, buffer, BUFFER_SIZE, 0);
+        if (valread <= 0) {
+            printf("Server baglantiyi kesti.\n");
+            break;
+        }
+
+        printf("Server'dan gelen cevap (Echo): %s", buffer);
     }
-    printf("Message is sent to server\n");
 
     close(sock);
     return 0;
